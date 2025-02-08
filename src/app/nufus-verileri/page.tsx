@@ -12,19 +12,15 @@ export default function NufusVerileri() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Relative URL kullan
         const response = await fetch('/api/bodrum-data', {
-          // Cache'i devre dışı bırak
-          cache: 'no-store',
-          next: { revalidate: 0 }
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
 
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
         const result = await response.json();
-        console.log('Fetched data:', result); // Debug için
+        console.log('API Response:', result); // Debug için
 
         if (result.success) {
           setData(result.data);
@@ -40,23 +36,7 @@ export default function NufusVerileri() {
   }, []);
 
   if (loading) {
-    return (
-      <Container>
-        <div className="mt-10 flex justify-center">
-          <div className="text-lg">Veriler Yükleniyor...</div>
-        </div>
-      </Container>
-    );
-  }
-
-  if (data.length === 0) {
-    return (
-      <Container>
-        <div className="mt-10 flex justify-center">
-          <div className="text-lg">Henüz veri bulunmamaktadır.</div>
-        </div>
-      </Container>
-    );
+    return <div>Yükleniyor...</div>;
   }
 
   return (
@@ -64,56 +44,35 @@ export default function NufusVerileri() {
       <Container>
         <div className="mt-10">
           <h2 className="text-2xl font-bold mb-6">Nüfus Verileri</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Fotoğraf
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    İlçe
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Mahalle
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Nüfus
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                    Yüzölçümü
-                  </th>
+          <table className="min-w-full">
+            <thead>
+              <tr>
+                <th>Fotoğraf</th>
+                <th>İlçe</th>
+                <th>Mahalle</th>
+                <th>Nüfus</th>
+                <th>Yüzölçümü</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data && data.map((item) => (
+                <tr key={item._id}>
+                  <td>
+                    <Image
+                      src={item.photo}
+                      alt={item.ilce}
+                      width={60}
+                      height={40}
+                    />
+                  </td>
+                  <td>{item.ilce}</td>
+                  <td>{item.mahalle}</td>
+                  <td>{item.nufus}</td>
+                  <td>{item.yuzolcumu}</td>
                 </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                {data.map((item) => (
-                  <tr key={item._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Image
-                        src={item.photo}
-                        alt={item.ilce}
-                        width={60}
-                        height={40}
-                        className="rounded-md"
-                      />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                      {item.ilce}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                      {item.mahalle}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                      {item.nufus.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">
-                      {item.yuzolcumu}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </Container>
     </main>
