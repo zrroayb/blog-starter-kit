@@ -3,16 +3,31 @@ import { Location } from '@/types/location';
 import Image from 'next/image';
 import dbConnect from '@/lib/mongodb';
 import LocationModel from '@/models/Location';
+import { Types } from 'mongoose';
+
+// MongoDB'den gelen veri tipi
+interface MongoLocation {
+  _id: Types.ObjectId;
+  ilce: string;
+  mahalle: string;
+  nufus: number;
+  yuzolcumu: string;
+  photo: string;
+}
 
 async function getData(): Promise<Location[]> {
   try {
     await dbConnect();
-    const locations = await LocationModel.find({}).lean();
+    const locations = await LocationModel.find({}).lean() as MongoLocation[];
     
     // MongoDB _id'yi string'e çevir
     const data = locations.map(loc => ({
-      ...loc,
-      _id: loc._id.toString()
+      _id: loc._id.toString(),
+      ilce: loc.ilce,
+      mahalle: loc.mahalle,
+      nufus: loc.nufus,
+      yuzolcumu: loc.yuzolcumu,
+      photo: loc.photo
     }));
 
     console.log('Fetched data:', data);
