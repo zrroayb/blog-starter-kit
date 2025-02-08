@@ -3,6 +3,9 @@ const nextConfig = {
   images: {
     domains: ["localhost"],
   },
+  env: {
+    MONGODB_URI: process.env.MONGODB_URI,
+  },
   experimental: {
     appDir: true,
   },
