@@ -3,8 +3,19 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
+// Location tipi tanımlayalım
+interface Location {
+  _id: string;
+  ilce: string;
+  mahalle: string;
+  nufus: number;
+  yuzolcumu: string;
+  photo: string;
+  createdAt?: Date;
+}
+
 export function AdminDataTable() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -80,7 +91,7 @@ export function AdminDataTable() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 dark:bg-slate-800 dark:divide-slate-700">
             {data.map((item) => (
-              <tr key={item.id}>
+              <tr key={item._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Image
                     src={item.photo}
@@ -96,7 +107,7 @@ export function AdminDataTable() {
                 <td className="px-6 py-4 whitespace-nowrap dark:text-slate-200">{item.yuzolcumu}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => handleDelete(item._id)}
                     className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                   >
                     Sil
