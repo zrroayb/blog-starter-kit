@@ -14,34 +14,160 @@ type BodrumDataType = {
   yuzolcumu: string;
 };
 
+type Filters = {
+  ilce: string;
+  mahalle: string;
+  nufus: string;
+  yuzolcumu: string;
+};
+
 export function BodrumDataTable() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterBy, setFilterBy] = useState<keyof BodrumDataType>('ilce');
+  const [filters, setFilters] = useState<Filters>({
+    ilce: '',
+    mahalle: '',
+    nufus: '',
+    yuzolcumu: ''
+  });
+  const [searchText, setSearchText] = useState('');
   const [selectedData, setSelectedData] = useState<BodrumDataType | null>(null);
 
+  // Benzersiz değerleri al
+  const uniqueValues = {
+    ilce: [...new Set(bodrumData.map(item => item.ilce))],
+    mahalle: [...new Set(bodrumData.map(item => item.mahalle))],
+    nufus: [...new Set(bodrumData.map(item => item.nufus.toString()))],
+    yuzolcumu: [...new Set(bodrumData.map(item => item.yuzolcumu))]
+  };
+
   const filteredData = bodrumData.filter((item) => {
-    const searchValue = String(item[filterBy]).toLowerCase();
-    return searchValue.includes(searchTerm.toLowerCase());
+    const matchesFilters = (
+      (!filters.ilce || item.ilce === filters.ilce) &&
+      (!filters.mahalle || item.mahalle === filters.mahalle) &&
+      (!filters.nufus || item.nufus.toString() === filters.nufus) &&
+      (!filters.yuzolcumu || item.yuzolcumu === filters.yuzolcumu)
+    );
+
+    const searchLower = searchText.toLowerCase();
+    const matchesSearch = searchText === '' || 
+      item.ilce.toLowerCase().includes(searchLower) ||
+      item.mahalle.toLowerCase().includes(searchLower) ||
+      item.nufus.toString().includes(searchLower) ||
+      item.yuzolcumu.toLowerCase().includes(searchLower);
+
+    return matchesFilters && matchesSearch;
   });
+
+  const handleFilterChange = (key: keyof Filters, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const clearAll = () => {
+    setFilters({
+      ilce: '',
+      mahalle: '',
+      nufus: '',
+      yuzolcumu: ''
+    });
+    setSearchText('');
+  };
 
   return (
     <>
       <div className="flex flex-col space-y-4">
-        <div className="flex flex-col md:flex-row gap-4 mb-4">
-          <input
-            type="text"
-            placeholder="Ara..."
-            className="p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600"
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <select
-            className="p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600"
-            onChange={(e) => setFilterBy(e.target.value as keyof BodrumDataType)}
-          >
-            <option value="ilce">İlçe</option>
-            <option value="mahalle">Mahalle</option>
-            <option value="nufus">Nüfus</option>
-          </select>
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
+          <div className="mb-4">
+            <label className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1 block">
+              Metin Ara
+            </label>
+            <input
+              type="text"
+              placeholder="İlçe, mahalle veya diğer bilgilerde ara..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="w-full p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
+                İlçe
+              </label>
+              <select
+                className="p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200"
+                value={filters.ilce}
+                onChange={(e) => handleFilterChange('ilce', e.target.value)}
+              >
+                <option value="">Tümü</option>
+                {uniqueValues.ilce.map((value) => (
+                  <option key={value} value={value}>{value}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
+                Mahalle
+              </label>
+              <select
+                className="p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200"
+                value={filters.mahalle}
+                onChange={(e) => handleFilterChange('mahalle', e.target.value)}
+              >
+                <option value="">Tümü</option>
+                {uniqueValues.mahalle.map((value) => (
+                  <option key={value} value={value}>{value}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
+                Nüfus
+              </label>
+              <select
+                className="p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200"
+                value={filters.nufus}
+                onChange={(e) => handleFilterChange('nufus', e.target.value)}
+              >
+                <option value="">Tümü</option>
+                {uniqueValues.nufus.map((value) => (
+                  <option key={value} value={value}>{parseInt(value).toLocaleString()}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">
+                Yüzölçümü
+              </label>
+              <select
+                className="p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200"
+                value={filters.yuzolcumu}
+                onChange={(e) => handleFilterChange('yuzolcumu', e.target.value)}
+              >
+                <option value="">Tümü</option>
+                {uniqueValues.yuzolcumu.map((value) => (
+                  <option key={value} value={value}>{value}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4 flex justify-between items-center">
+            <p className="text-sm text-gray-500 dark:text-slate-400">
+              {filteredData.length} sonuç bulundu
+            </p>
+            <button
+              onClick={clearAll}
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200 font-medium py-2 px-4 rounded-md transition-colors duration-200"
+            >
+              Tüm Filtreleri Temizle
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
