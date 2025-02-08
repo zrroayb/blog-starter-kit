@@ -11,7 +11,6 @@ interface Location {
   nufus: number;
   yuzolcumu: string;
   photo: string;
-  createdAt?: Date;
 }
 
 export function AdminDataTable() {
