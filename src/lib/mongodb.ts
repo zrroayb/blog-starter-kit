@@ -1,5 +1,13 @@
 import mongoose from 'mongoose';
 
+// Global tip tanımlaması
+declare global {
+  var mongoose: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  };
+}
+
 if (!process.env.MONGODB_URI) {
   throw new Error('MONGODB_URI is not defined');
 }
