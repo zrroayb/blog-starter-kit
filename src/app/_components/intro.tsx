@@ -22,6 +22,12 @@ export function Intro() {
             Nüfus Verileri
           </Link>
           <Link 
+            href="/posts" 
+            className="hover:underline dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors"
+          >
+            Blog Yazıları
+          </Link>
+          <Link 
             href="/about" 
             className="hover:underline dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors"
           >
@@ -47,9 +53,22 @@ export function Intro() {
             </Link>
             <Link
               href="/posts"
-              className="hover:underline font-bold dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors"
+              className="hover:underline font-bold dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors flex items-center"
             >
-              Blog Yazılarını Oku →
+              Blog Yazılarını Oku
+              <svg 
+                className="ml-2 w-4 h-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
             </Link>
           </div>
         </div>

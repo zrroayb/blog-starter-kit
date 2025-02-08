@@ -22,6 +22,12 @@ const Header = () => {
           Nüfus Verileri
         </Link>
         <Link 
+          href="/posts" 
+          className="hover:underline dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors"
+        >
+          Blog Yazıları
+        </Link>
+        <Link 
           href="/about" 
           className="hover:underline dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors"
         >
