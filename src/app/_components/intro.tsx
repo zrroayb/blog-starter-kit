@@ -5,7 +5,7 @@ export function Intro() {
   return (
     <section className="flex-col md:flex-row flex items-center md:justify-between mt-16 mb-16 md:mb-12">
       <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight md:pr-8">
-        Blog.
+        Bodrum.
       </h1>
       <nav className="flex space-x-6 text-lg md:text-xl font-medium mt-5 md:mt-0">
         <Link 
@@ -18,7 +18,7 @@ export function Intro() {
           href="/bodrum-data" 
           className="hover:underline dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors"
         >
-          Bodrum Verileri
+          Nüfus Verileri
         </Link>
         <Link 
           href="/about" 
