@@ -10,30 +10,54 @@ export default function NufusVerileri() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Relative URL kullan
+        const response = await fetch('/api/bodrum-data', {
+          // Cache'i devre dışı bırak
+          cache: 'no-store',
+          next: { revalidate: 0 }
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const result = await response.json();
+        console.log('Fetched data:', result); // Debug için
+
+        if (result.success) {
+          setData(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch('/api/bodrum-data');
-      const result = await response.json();
-      if (result.success) {
-        setData(result.data);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (loading) {
+    return (
+      <Container>
+        <div className="mt-10 flex justify-center">
+          <div className="text-lg">Veriler Yükleniyor...</div>
+        </div>
+      </Container>
+    );
+  }
 
-  if (loading) return (
-    <Container>
-      <div className="mt-10">
-        <div>Yükleniyor...</div>
-      </div>
-    </Container>
-  );
+  if (data.length === 0) {
+    return (
+      <Container>
+        <div className="mt-10 flex justify-center">
+          <div className="text-lg">Henüz veri bulunmamaktadır.</div>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <main>
