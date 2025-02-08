@@ -19,39 +19,61 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    // MongoDB bağlantısı
     await dbConnect();
+    console.log('MongoDB connected');
+
     const formData = await request.formData();
+    console.log('Form data received:', Object.fromEntries(formData));
     
     // Fotoğraf işleme
     const photo = formData.get('photo') as File;
+    if (!photo) {
+      throw new Error('No photo uploaded');
+    }
+
     const bytes = await photo.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
+    // Upload directory kontrolü
     const uploadDir = path.join(process.cwd(), 'public', 'images', 'bodrum');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
+    console.log('Upload directory created/checked');
 
     const uniqueFileName = `${Date.now()}-${photo.name}`;
     const filePath = path.join(uploadDir, uniqueFileName);
     fs.writeFileSync(filePath, buffer);
+    console.log('Photo saved to:', filePath);
     
     const photoUrl = `/images/bodrum/${uniqueFileName}`;
 
     // MongoDB'ye kaydet
-    const location = await Location.create({
+    const locationData = {
       ilce: formData.get('ilce'),
       mahalle: formData.get('mahalle'),
       nufus: parseInt(formData.get('nufus') as string),
       yuzolcumu: formData.get('yuzolcumu'),
       photo: photoUrl
-    });
+    };
+    console.log('Saving location data:', locationData);
 
-    return NextResponse.json({ success: true, data: location });
+    const location = await Location.create(locationData);
+    console.log('Location saved:', location);
+
+    return NextResponse.json({ 
+      success: true, 
+      data: location 
+    });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in POST /api/bodrum-data:', error);
     return NextResponse.json(
-      { success: false, error: 'Veri kaydedilemedi' },
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Veri kaydedilemedi',
+        details: error 
+      },
       { status: 500 }
     );
   }

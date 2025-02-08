@@ -30,14 +30,19 @@ export function AdminDataForm() {
     e.preventDefault();
     
     try {
+      if (!formData.photo) {
+        alert('Lütfen bir fotoğraf seçin');
+        return;
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append('ilce', formData.ilce);
       formDataToSend.append('mahalle', formData.mahalle);
       formDataToSend.append('nufus', formData.nufus);
       formDataToSend.append('yuzolcumu', formData.yuzolcumu);
-      if (formData.photo) {
-        formDataToSend.append('photo', formData.photo);
-      }
+      formDataToSend.append('photo', formData.photo);
+
+      console.log('Sending data:', Object.fromEntries(formDataToSend));
 
       const response = await fetch('/api/bodrum-data', {
         method: 'POST',
@@ -45,6 +50,7 @@ export function AdminDataForm() {
       });
 
       const result = await response.json();
+      console.log('Server response:', result);
 
       if (result.success) {
         // Form'u temizle
@@ -60,17 +66,14 @@ export function AdminDataForm() {
           fileInputRef.current.value = '';
         }
 
-        // Başarı mesajı göster
         alert('Veri başarıyla kaydedildi!');
-        
-        // Tabloyu yenile (AdminDataTable bileşenini güncelle)
         window.location.reload();
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || 'Bir hata oluştu');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Veri kaydedilirken bir hata oluştu!');
+      alert(`Veri kaydedilirken bir hata oluştu: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`);
     }
   };
 
