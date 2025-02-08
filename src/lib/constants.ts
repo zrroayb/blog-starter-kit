@@ -5,5 +5,5 @@ export const HOME_OG_IMAGE_URL =
 
 // Base URL'yi ortama göre ayarla
 export const BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://bodrum-blog.vercel.app'  // Vercel'deki domain adınızı buraya yazın
+  ? 'https://blog-starter-kit-two-gold.vercel.app'  // Vercel'deki domain adınızı buraya yazın
   : 'http://localhost:3000'
