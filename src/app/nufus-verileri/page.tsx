@@ -4,8 +4,18 @@ import Container from "@/app/_components/container";
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
+// Veri tipi tanımlaması
+interface LocationData {
+  _id: string;
+  ilce: string;
+  mahalle: string;
+  nufus: number;
+  yuzolcumu: string;
+  photo: string;
+}
+
 export default function NufusVerileri() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<LocationData[]>([]);
 
   useEffect(() => {
     // MongoDB'den verileri çek
