@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Location from '@/models/Location';
-import fs from 'fs';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Cloudinary yapılandırması
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET() {
   try {
@@ -24,7 +30,7 @@ export async function POST(request: Request) {
     console.log('MongoDB connected');
 
     const formData = await request.formData();
-    console.log('Form data received:', Object.fromEntries(formData));
+    console.log('Form data received');
     
     // Fotoğraf işleme
     const photo = formData.get('photo') as File;
@@ -32,22 +38,16 @@ export async function POST(request: Request) {
       throw new Error('No photo uploaded');
     }
 
+    // Fotoğrafı base64'e çevir
     const bytes = await photo.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
-    // Upload directory kontrolü
-    const uploadDir = path.join(process.cwd(), 'public', 'images', 'bodrum');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    console.log('Upload directory created/checked');
+    const base64Image = `data:${photo.type};base64,${buffer.toString('base64')}`;
 
-    const uniqueFileName = `${Date.now()}-${photo.name}`;
-    const filePath = path.join(uploadDir, uniqueFileName);
-    fs.writeFileSync(filePath, buffer);
-    console.log('Photo saved to:', filePath);
-    
-    const photoUrl = `/images/bodrum/${uniqueFileName}`;
+    // Cloudinary'ye yükle
+    const uploadResponse = await cloudinary.uploader.upload(base64Image, {
+      folder: 'bodrum',
+    });
+    console.log('Photo uploaded to Cloudinary');
 
     // MongoDB'ye kaydet
     const locationData = {
@@ -55,12 +55,12 @@ export async function POST(request: Request) {
       mahalle: formData.get('mahalle'),
       nufus: parseInt(formData.get('nufus') as string),
       yuzolcumu: formData.get('yuzolcumu'),
-      photo: photoUrl
+      photo: uploadResponse.secure_url
     };
-    console.log('Saving location data:', locationData);
+    console.log('Saving location data');
 
     const location = await Location.create(locationData);
-    console.log('Location saved:', location);
+    console.log('Location saved');
 
     return NextResponse.json({ 
       success: true, 
@@ -86,9 +86,10 @@ export async function DELETE(request: Request) {
     
     const location = await Location.findById(id);
     if (location?.photo) {
-      const photoPath = path.join(process.cwd(), 'public', location.photo);
-      if (fs.existsSync(photoPath)) {
-        fs.unlinkSync(photoPath);
+      // Cloudinary'den fotoğrafı sil
+      const publicId = location.photo.split('/').pop()?.split('.')[0];
+      if (publicId) {
+        await cloudinary.uploader.destroy(`bodrum/${publicId}`);
       }
     }
 

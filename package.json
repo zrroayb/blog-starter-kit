@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "classnames": "^2.5.1",
+    "cloudinary": "^2.5.1",
     "date-fns": "^3.6.0",
     "gray-matter": "^4.0.3",
     "mongodb": "^6.13.0",
