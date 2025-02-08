@@ -3,24 +3,25 @@ import { Location } from '@/types/location';
 import Image from 'next/image';
 import dbConnect from '@/lib/mongodb';
 import LocationModel from '@/models/Location';
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 // MongoDB'den gelen veri tipi
-interface MongoLocation {
+interface MongoLocation extends Document {
   _id: Types.ObjectId;
   ilce: string;
   mahalle: string;
   nufus: number;
   yuzolcumu: string;
   photo: string;
+  __v?: number;
 }
 
 async function getData(): Promise<Location[]> {
   try {
     await dbConnect();
-    const locations = await LocationModel.find({}).lean() as MongoLocation[];
+    const locations = (await LocationModel.find({}).lean()) as unknown as MongoLocation[];
     
-    // MongoDB _id'yi string'e çevir
+    // MongoDB _id'yi string'e çevir ve sadece ihtiyacımız olan alanları al
     const data = locations.map(loc => ({
       _id: loc._id.toString(),
       ilce: loc.ilce,
@@ -30,7 +31,6 @@ async function getData(): Promise<Location[]> {
       photo: loc.photo
     }));
 
-    console.log('Fetched data:', data);
     return data;
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -40,8 +40,6 @@ async function getData(): Promise<Location[]> {
 
 export default async function NufusVerileri() {
   const locationData = await getData();
-
-  console.log('Location data:', locationData);
 
   return (
     <main>
