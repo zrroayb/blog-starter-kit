@@ -1,12 +1,16 @@
 import Container from "@/app/_components/container";
 import { Location } from '@/types/location';
 import Image from 'next/image';
+import { BASE_URL } from '@/lib/constants';
 
 async function getData(): Promise<Location[]> {
   try {
-    const res = await fetch('http://localhost:3000/api/bodrum-data', {
+    const res = await fetch(`${BASE_URL}/api/bodrum-data`, {
       cache: 'no-store',
-      next: { revalidate: 0 }
+      next: { revalidate: 0 },
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (!res.ok) {
@@ -14,6 +18,7 @@ async function getData(): Promise<Location[]> {
     }
 
     const data = await res.json();
+    console.log('Fetched data:', data);
     return data.data;
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -23,6 +28,8 @@ async function getData(): Promise<Location[]> {
 
 export default async function NufusVerileri() {
   const locationData = await getData();
+
+  console.log('Location data:', locationData);
 
   return (
     <main>
