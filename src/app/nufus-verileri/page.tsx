@@ -1,45 +1,39 @@
+'use client';
+
 import Container from "@/app/_components/container";
 import { Location } from '@/types/location';
 import Image from 'next/image';
-import dbConnect from '@/lib/mongodb';
-import LocationModel from '@/models/Location';
-import { Document, Types } from 'mongoose';
+import { useState, useEffect } from 'react';
 
-// MongoDB'den gelen veri tipi
-interface MongoLocation extends Document {
-  _id: Types.ObjectId;
-  ilce: string;
-  mahalle: string;
-  nufus: number;
-  yuzolcumu: string;
-  photo: string;
-  __v?: number;
-}
+export default function NufusVerileri() {
+  const [data, setData] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(true);
 
-async function getData(): Promise<Location[]> {
-  try {
-    await dbConnect();
-    const locations = (await LocationModel.find({}).lean()) as unknown as MongoLocation[];
-    
-    // MongoDB _id'yi string'e çevir ve sadece ihtiyacımız olan alanları al
-    const data = locations.map(loc => ({
-      _id: loc._id.toString(),
-      ilce: loc.ilce,
-      mahalle: loc.mahalle,
-      nufus: loc.nufus,
-      yuzolcumu: loc.yuzolcumu,
-      photo: loc.photo
-    }));
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-    return data;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    return [];
-  }
-}
+  const fetchData = async () => {
+    try {
+      const response = await fetch('/api/bodrum-data');
+      const result = await response.json();
+      if (result.success) {
+        setData(result.data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-export default async function NufusVerileri() {
-  const locationData = await getData();
+  if (loading) return (
+    <Container>
+      <div className="mt-10">
+        <div>Yükleniyor...</div>
+      </div>
+    </Container>
+  );
 
   return (
     <main>
@@ -68,7 +62,7 @@ export default async function NufusVerileri() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                {locationData.map((item) => (
+                {data.map((item) => (
                   <tr key={item._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Image
