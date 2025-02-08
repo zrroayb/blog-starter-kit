@@ -18,54 +18,51 @@ export default function NufusVerileri() {
   const [data, setData] = useState<LocationData[]>([]);
 
   useEffect(() => {
-    // MongoDB'den verileri çek
+    // Direkt MongoDB verilerini getir
     fetch('/api/bodrum-data')
       .then(res => res.json())
       .then(result => {
         if (result.data) {
-          console.log('MongoDB data:', result.data);
           setData(result.data);
         }
-      })
-      .catch(error => console.error('Error:', error));
+      });
   }, []);
 
   return (
-    <main>
-      <Container>
-        <div style={{ margin: '20px' }}>
-          <h2 style={{ marginBottom: '20px' }}>Nüfus Verileri</h2>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={{ padding: '10px', textAlign: 'left' }}>Fotoğraf</th>
-                <th style={{ padding: '10px', textAlign: 'left' }}>İlçe</th>
-                <th style={{ padding: '10px', textAlign: 'left' }}>Mahalle</th>
-                <th style={{ padding: '10px', textAlign: 'left' }}>Nüfus</th>
-                <th style={{ padding: '10px', textAlign: 'left' }}>Yüzölçümü</th>
+    <Container>
+      <div style={{ padding: '20px' }}>
+        <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>Bodrum Nüfus Verileri</h1>
+        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
+          <thead>
+            <tr style={{ backgroundColor: '#f5f5f5' }}>
+              <th style={{ border: '1px solid #ddd', padding: '12px' }}>Fotoğraf</th>
+              <th style={{ border: '1px solid #ddd', padding: '12px' }}>İlçe</th>
+              <th style={{ border: '1px solid #ddd', padding: '12px' }}>Mahalle</th>
+              <th style={{ border: '1px solid #ddd', padding: '12px' }}>Nüfus</th>
+              <th style={{ border: '1px solid #ddd', padding: '12px' }}>Yüzölçümü</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map(item => (
+              <tr key={item._id}>
+                <td style={{ border: '1px solid #ddd', padding: '12px', textAlign: 'center' }}>
+                  <Image
+                    src={item.photo}
+                    alt={item.ilce}
+                    width={80}
+                    height={60}
+                    style={{ objectFit: 'cover' }}
+                  />
+                </td>
+                <td style={{ border: '1px solid #ddd', padding: '12px' }}>{item.ilce}</td>
+                <td style={{ border: '1px solid #ddd', padding: '12px' }}>{item.mahalle}</td>
+                <td style={{ border: '1px solid #ddd', padding: '12px' }}>{item.nufus}</td>
+                <td style={{ border: '1px solid #ddd', padding: '12px' }}>{item.yuzolcumu}</td>
               </tr>
-            </thead>
-            <tbody>
-              {data.map((item) => (
-                <tr key={item._id} style={{ borderBottom: '1px solid #ddd' }}>
-                  <td style={{ padding: '10px' }}>
-                    <Image
-                      src={item.photo}
-                      alt={item.ilce}
-                      width={60}
-                      height={40}
-                    />
-                  </td>
-                  <td style={{ padding: '10px' }}>{item.ilce}</td>
-                  <td style={{ padding: '10px' }}>{item.mahalle}</td>
-                  <td style={{ padding: '10px' }}>{item.nufus}</td>
-                  <td style={{ padding: '10px' }}>{item.yuzolcumu}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Container>
-    </main>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Container>
   );
 } 
