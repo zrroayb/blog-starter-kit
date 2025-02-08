@@ -1,16 +1,55 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { bodrumData } from '@/lib/bodrum-data';
 
 export function AdminDataTable() {
-  const [data, setData] = useState(bodrumData);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleDelete = (id: number) => {
-    // Burada API çağrısı yapılacak
-    setData(data.filter(item => item.id !== id));
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch('/api/bodrum-data');
+      const result = await response.json();
+      if (result.success) {
+        setData(result.data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Bu veriyi silmek istediğinizden emin misiniz?')) {
+      try {
+        const response = await fetch('/api/bodrum-data', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          fetchData(); // Tabloyu yenile
+        } else {
+          throw new Error(result.error);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Veri silinirken bir hata oluştu!');
+      }
+    }
+  };
+
+  if (loading) return <div>Yükleniyor...</div>;
 
   return (
     <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">

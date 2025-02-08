@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ... existing code ...
+  images: {
+    domains: ["localhost"],
+  },
   experimental: {
     appDir: true,
   },
