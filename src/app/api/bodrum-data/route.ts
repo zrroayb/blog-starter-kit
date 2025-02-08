@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       });
     } catch (uploadError) {
       console.error('Upload error:', uploadError);
-      throw new Error(`Yükleme hatası: ${uploadError.message}`);
+      throw new Error(`Yükleme hatası: ${uploadError instanceof Error ? uploadError.message : 'Bilinmeyen hata'}`);
     }
   } catch (error) {
     console.error('Error details:', error);
