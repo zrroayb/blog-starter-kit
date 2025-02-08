@@ -30,49 +30,69 @@ export async function POST(request: Request) {
     console.log('MongoDB connected');
 
     const formData = await request.formData();
-    console.log('Form data received');
     
-    // Fotoğraf işleme
+    // Form verilerini kontrol et
+    const ilce = formData.get('ilce');
+    const mahalle = formData.get('mahalle');
+    const nufus = formData.get('nufus');
+    const yuzolcumu = formData.get('yuzolcumu');
     const photo = formData.get('photo') as File;
+
+    console.log('Form data:', { ilce, mahalle, nufus, yuzolcumu });
+
     if (!photo) {
-      throw new Error('No photo uploaded');
+      throw new Error('Fotoğraf yüklenmedi');
     }
 
-    // Fotoğrafı base64'e çevir
-    const bytes = await photo.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64Image = `data:${photo.type};base64,${buffer.toString('base64')}`;
+    if (!ilce || !mahalle || !nufus || !yuzolcumu) {
+      throw new Error('Tüm alanları doldurun');
+    }
 
-    // Cloudinary'ye yükle
-    const uploadResponse = await cloudinary.uploader.upload(base64Image, {
-      folder: 'bodrum',
-    });
-    console.log('Photo uploaded to Cloudinary');
+    try {
+      // Fotoğrafı base64'e çevir
+      const bytes = await photo.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const base64Image = `data:${photo.type};base64,${buffer.toString('base64')}`;
 
-    // MongoDB'ye kaydet
-    const locationData = {
-      ilce: formData.get('ilce'),
-      mahalle: formData.get('mahalle'),
-      nufus: parseInt(formData.get('nufus') as string),
-      yuzolcumu: formData.get('yuzolcumu'),
-      photo: uploadResponse.secure_url
-    };
-    console.log('Saving location data');
+      console.log('Uploading to Cloudinary...');
+      
+      // Cloudinary'ye yükle
+      const uploadResponse = await cloudinary.uploader.upload(base64Image, {
+        folder: 'bodrum',
+      });
 
-    const location = await Location.create(locationData);
-    console.log('Location saved');
+      console.log('Cloudinary response:', uploadResponse);
 
-    return NextResponse.json({ 
-      success: true, 
-      data: location 
-    });
+      // MongoDB'ye kaydet
+      const locationData = {
+        ilce,
+        mahalle,
+        nufus: parseInt(nufus as string),
+        yuzolcumu,
+        photo: uploadResponse.secure_url
+      };
+
+      console.log('Saving to MongoDB:', locationData);
+
+      const location = await Location.create(locationData);
+      
+      console.log('Saved successfully:', location);
+
+      return NextResponse.json({ 
+        success: true, 
+        data: location 
+      });
+    } catch (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw new Error(`Yükleme hatası: ${uploadError.message}`);
+    }
   } catch (error) {
-    console.error('Error in POST /api/bodrum-data:', error);
+    console.error('Error details:', error);
     return NextResponse.json(
       { 
         success: false, 
         error: error instanceof Error ? error.message : 'Veri kaydedilemedi',
-        details: error 
+        details: JSON.stringify(error, Object.getOwnPropertyNames(error))
       },
       { status: 500 }
     );
