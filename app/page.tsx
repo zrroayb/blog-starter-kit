@@ -1,3 +1,5 @@
+'use client'
+
 import { useTranslation } from '../utils/useTranslation'
 
 export default function Home() {
