@@ -54,28 +54,31 @@ export default function Posts() {
       <Header />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
         {posts.map((post) => (
-          <article key={post._id} className="cursor-pointer group">
-            <Link href={`/posts/${post._id}`} className="block">
-              <div className="mb-5 transition-transform duration-200 group-hover:scale-105">
-                <Image
-                  src={post.coverImage}
-                  alt={post.title}
-                  width={400}
-                  height={300}
-                  className="w-full object-cover rounded-lg"
-                />
-              </div>
-              <h3 className="text-2xl mb-3 leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400">
+          <article key={post._id}>
+            <div className="mb-5">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                width={400}
+                height={300}
+                className="w-full object-cover rounded-lg"
+              />
+            </div>
+            <h3 className="text-2xl mb-3 leading-snug">
+              <Link
+                href={`/posts/${post._id}`}
+                className="hover:underline"
+              >
                 {post.title}
-              </h3>
-              <div className="text-lg mb-4">
-                <DateFormatter dateString={post.date} />
-              </div>
-              <p className="text-lg leading-relaxed mb-4">{post.excerpt}</p>
-              <div className="text-sm">
-                Yazar: {post.author}
-              </div>
-            </Link>
+              </Link>
+            </h3>
+            <div className="text-lg mb-4">
+              <DateFormatter dateString={post.date} />
+            </div>
+            <p className="text-lg leading-relaxed mb-4">{post.excerpt}</p>
+            <div className="text-sm">
+              Yazar: {post.author}
+            </div>
           </article>
         ))}
       </div>
