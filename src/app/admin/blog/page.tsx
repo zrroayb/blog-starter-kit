@@ -6,6 +6,10 @@ import Header from '@/app/_components/header';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+interface CloudinaryError {
+  message: string;
+}
+
 export default function AdminBlog() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -61,7 +65,7 @@ export default function AdminBlog() {
       return data.secure_url;
     } catch (error) {
       console.error('Error uploading to Cloudinary:', error);
-      throw new Error('Görsel yüklenemedi');
+      throw new Error(error instanceof Error ? error.message : 'Görsel yüklenemedi');
     }
   };
 
@@ -76,7 +80,7 @@ export default function AdminBlog() {
         try {
           imageUrl = await uploadToCloudinary(selectedFile);
         } catch (error) {
-          setMessage('Görsel yükleme hatası: ' + error.message);
+          setMessage('Görsel yükleme hatası: ' + (error instanceof Error ? error.message : 'Bilinmeyen hata'));
           setLoading(false);
           return;
         }
@@ -87,7 +91,7 @@ export default function AdminBlog() {
         coverImage: imageUrl
       };
 
-      console.log('Sending post data:', postData); // Debug için
+      console.log('Sending post data:', postData);
 
       const response = await fetch('/api/blog-posts', {
         method: 'POST',
@@ -123,7 +127,7 @@ export default function AdminBlog() {
       }
     } catch (error) {
       console.error('Submit error:', error);
-      setMessage('Hata: ' + (error.message || 'Bilinmeyen bir hata oluştu'));
+      setMessage('Hata: ' + (error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu'));
     } finally {
       setLoading(false);
     }
