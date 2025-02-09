@@ -8,6 +8,12 @@ import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import { Types } from 'mongoose';
 
+// Author interface to match PostPreview expectations
+interface Author {
+  name: string;
+  picture: string;
+}
+
 // Interface for MongoDB document
 interface MongoPost {
   _id: Types.ObjectId;
@@ -27,14 +33,13 @@ interface PostData {
   excerpt: string;
   coverImage: string;
   date: string;
-  author: string;
+  author: Author;  // Changed to Author type
   content: string;
 }
 
 async function getPosts(): Promise<PostData[]> {
   try {
     await dbConnect();
-    // First cast to unknown, then to MongoPost[]
     const posts = (await Post.find({}).sort({ date: -1 }).lean()) as unknown as MongoPost[];
     
     // Transform MongoDB documents to match the existing Post interface
@@ -44,7 +49,10 @@ async function getPosts(): Promise<PostData[]> {
       excerpt: post.excerpt,
       coverImage: post.coverImage,
       date: post.date,
-      author: post.author,
+      author: {
+        name: post.author,
+        picture: '/assets/blog/authors/default.jpg'  // Default picture path
+      },
       content: post.content
     }));
   } catch (error) {
