@@ -32,11 +32,8 @@ interface PostData {
   title: string;
   excerpt: string;
   coverImage: string;
-  date: string;
-  author: {
-    name: string;
-    picture: string;
-  };
+  date: string;  // This will be ISO string
+  author: Author;
   content: string;
 }
 
@@ -45,15 +42,16 @@ async function getPosts(): Promise<PostData[]> {
     await dbConnect();
     const posts = (await Post.find({}).sort({ date: -1 }).lean()) as unknown as MongoPost[];
     
+    // Transform MongoDB documents to match the existing Post interface
     return posts.map(post => ({
       slug: post._id.toString(),
       title: post.title,
       excerpt: post.excerpt,
       coverImage: post.coverImage,
-      date: new Date(post.date).toISOString(),
+      date: new Date(post.date).toISOString(),  // Convert Date to ISO string
       author: {
         name: post.author,
-        picture: '/assets/blog/authors/default.jpg'
+        picture: '/assets/blog/authors/default.jpg'  // Default picture path
       },
       content: post.content
     }));
