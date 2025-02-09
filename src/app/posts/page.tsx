@@ -20,7 +20,7 @@ interface MongoPost {
   title: string;
   excerpt: string;
   coverImage: string;
-  date: string;
+  date: Date;  // Changed to Date type
   author: string;
   content: string;
   __v?: number;
@@ -32,8 +32,8 @@ interface PostData {
   title: string;
   excerpt: string;
   coverImage: string;
-  date: string;
-  author: Author;  // Changed to Author type
+  date: string;  // This will be ISO string
+  author: Author;
   content: string;
 }
 
@@ -48,7 +48,7 @@ async function getPosts(): Promise<PostData[]> {
       title: post.title,
       excerpt: post.excerpt,
       coverImage: post.coverImage,
-      date: post.date,
+      date: new Date(post.date).toISOString(),  // Convert Date to ISO string
       author: {
         name: post.author,
         picture: '/assets/blog/authors/default.jpg'  // Default picture path
