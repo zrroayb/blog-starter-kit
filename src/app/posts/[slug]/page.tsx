@@ -21,10 +21,14 @@ interface PostData {
   excerpt: string;
 }
 
+interface PageProps {
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
 async function getPostBySlug(slug: string): Promise<PostData | null> {
   try {
     await dbConnect();
-    // Convert string slug back to ObjectId
     const objectId = new Types.ObjectId(slug);
     const post = await Post.findById(objectId).lean();
 
@@ -50,11 +54,7 @@ async function getPostBySlug(slug: string): Promise<PostData | null> {
   }
 }
 
-export default async function PostPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function PostPage({ params }: PageProps) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -79,11 +79,7 @@ export default async function PostPage({
   );
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
