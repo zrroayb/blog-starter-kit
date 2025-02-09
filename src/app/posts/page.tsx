@@ -55,7 +55,7 @@ export default function Posts() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-32">
         {posts.map((post) => (
           <article key={post._id} className="cursor-pointer group">
-            <Link href={`/posts/${post._id}`}>
+            <Link href={`/posts/${post._id}`} className="block">
               <div className="mb-5 transition-transform duration-200 group-hover:scale-105">
                 <Image
                   src={post.coverImage}

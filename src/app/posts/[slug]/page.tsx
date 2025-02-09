@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAllPosts, getPostBySlug } from "@/lib/api";
@@ -8,10 +12,43 @@ import Container from "@/app/_components/container";
 import Header from "@/app/_components/header";
 import { PostBody } from "@/app/_components/post-body";
 import { PostHeader } from "@/app/_components/post-header";
+import DateFormatter from '@/app/_components/date-formatter';
+import Image from 'next/image';
 
-export default async function Post(props: Params) {
-  const params = await props.params;
-  const post = getPostBySlug(params.slug);
+interface Post {
+  _id: string;
+  title: string;
+  content: string;
+  excerpt: string;
+  coverImage: string;
+  date: string;
+  author: string;
+}
+
+export default function BlogPost() {
+  const params = useParams<{ slug: string }>();
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`/api/blog-posts/${params.slug}`);
+        const result = await response.json();
+        if (result.success) {
+          setPost(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching post:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (params.slug) {
+      fetchPost();
+    }
+  }, [params.slug]);
 
   if (!post) {
     return notFound();
@@ -37,12 +74,6 @@ export default async function Post(props: Params) {
     </main>
   );
 }
-
-type Params = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
 
 export async function generateMetadata(props: Params): Promise<Metadata> {
   const params = await props.params;
@@ -70,3 +101,9 @@ export async function generateStaticParams() {
     slug: post.slug,
   }));
 }
+
+type Params = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
