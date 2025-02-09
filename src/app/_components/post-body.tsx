@@ -1,10 +1,6 @@
 import markdownStyles from "./markdown-styles.module.css";
 
-type Props = {
-  content: string;
-};
-
-export function PostBody({ content }: Props) {
+export function PostBody({ content }: { content: string }) {
   return (
     <div className="max-w-2xl mx-auto">
       <div

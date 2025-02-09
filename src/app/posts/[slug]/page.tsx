@@ -8,16 +8,62 @@ import Container from "@/app/_components/container";
 import Header from "@/app/_components/header";
 import { PostBody } from "@/app/_components/post-body";
 import { PostHeader } from "@/app/_components/post-header";
+import dbConnect from '@/lib/mongodb';
+import Post from '@/models/Post';
+import { Types } from 'mongoose';
 
-export default async function Post(props: Params) {
-  const params = await props.params;
-  const post = getPostBySlug(params.slug);
+interface PostType {
+  slug: string;
+  title: string;
+  date: string;
+  coverImage: string;
+  author: {
+    name: string;
+    picture: string;
+  };
+  excerpt: string;
+  content: string;
+}
+
+async function getPostBySlug(slug: string): Promise<PostType | null> {
+  try {
+    await dbConnect();
+    // Convert string slug back to ObjectId
+    const objectId = new Types.ObjectId(slug);
+    const post = await Post.findById(objectId).lean();
+
+    if (!post) {
+      return null;
+    }
+
+    return {
+      slug: post._id.toString(),
+      title: post.title,
+      date: new Date(post.date).toISOString(),
+      coverImage: post.coverImage,
+      author: {
+        name: post.author,
+        picture: '/assets/blog/authors/default.jpg'
+      },
+      excerpt: post.excerpt,
+      content: post.content
+    };
+  } catch (error) {
+    console.error('Error fetching post:', error);
+    return null;
+  }
+}
+
+export default async function PostPage({
+  params,
+}: {
+  params: { slug: string };
+}) {
+  const post = await getPostBySlug(params.slug);
 
   if (!post) {
     return notFound();
   }
-
-  const content = await markdownToHtml(post.content || "");
 
   return (
     <main>
@@ -31,35 +77,17 @@ export default async function Post(props: Params) {
             date={post.date}
             author={post.author}
           />
-          <PostBody content={content} />
+          <PostBody content={post.content} />
         </article>
       </Container>
     </main>
   );
 }
 
-type Params = {
-  params: Promise<{
-    slug: string;
-  }>;
-};
-
-export async function generateMetadata(props: Params): Promise<Metadata> {
-  const params = await props.params;
-  const post = getPostBySlug(params.slug);
-
-  if (!post) {
-    return notFound();
-  }
-
-  const title = `${post.title} | Next.js Blog Example with ${CMS_NAME}`;
-
+export function generateMetadata({ params }: { params: { slug: string } }) {
   return {
-    title,
-    openGraph: {
-      title,
-      images: [post.ogImage.url],
-    },
+    title: `${params.slug} | Blog Yazıları | Bodrum`,
+    description: 'Bodrum hakkında detaylı blog yazısı.',
   };
 }
 
