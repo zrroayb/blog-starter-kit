@@ -19,11 +19,21 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const data = await request.json();
+
+    // Validate required fields
+    if (!data.title || !data.content || !data.excerpt || !data.coverImage || !data.author) {
+      return NextResponse.json(
+        { success: false, error: 'Tüm alanlar zorunludur' },
+        { status: 400 }
+      );
+    }
+
     const post = await Post.create(data);
     return NextResponse.json({ success: true, data: post });
   } catch (error) {
+    console.error('Blog post creation error:', error);
     return NextResponse.json(
-      { success: false, error: 'Blog yazısı eklenemedi' },
+      { success: false, error: 'Blog yazısı eklenemedi: ' + error.message },
       { status: 500 }
     );
   }

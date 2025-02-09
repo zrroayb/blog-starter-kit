@@ -33,18 +33,31 @@ export default function AdminBlog() {
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'ml_default'); // Your upload preset
+    formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '');
 
     try {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      if (!cloudName) {
+        throw new Error('Cloudinary cloud name is not configured');
+      }
+
       const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
         {
           method: 'POST',
           body: formData,
         }
       );
 
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
       const data = await response.json();
+      if (!data.secure_url) {
+        throw new Error('No secure URL in response');
+      }
+
       return data.secure_url;
     } catch (error) {
       console.error('Error uploading to Cloudinary:', error);
@@ -58,22 +71,35 @@ export default function AdminBlog() {
     setMessage('');
 
     try {
-      // First upload the image if selected
-      let imageUrl = formData.coverImage;
+      let imageUrl = '';
       if (selectedFile) {
-        imageUrl = await uploadToCloudinary(selectedFile);
+        try {
+          imageUrl = await uploadToCloudinary(selectedFile);
+        } catch (error) {
+          setMessage('Görsel yükleme hatası: ' + error.message);
+          setLoading(false);
+          return;
+        }
       }
+
+      const postData = {
+        ...formData,
+        coverImage: imageUrl
+      };
+
+      console.log('Sending post data:', postData); // Debug için
 
       const response = await fetch('/api/blog-posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          coverImage: imageUrl
-        }),
+        body: JSON.stringify(postData),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
       
@@ -93,11 +119,11 @@ export default function AdminBlog() {
           router.refresh();
         }, 2000);
       } else {
-        setMessage('Hata: ' + result.error);
+        setMessage('Hata: ' + (result.error || 'Bilinmeyen bir hata oluştu'));
       }
     } catch (error) {
-      setMessage('Bir hata oluştu');
-      console.error('Error:', error);
+      console.error('Submit error:', error);
+      setMessage('Hata: ' + (error.message || 'Bilinmeyen bir hata oluştu'));
     } finally {
       setLoading(false);
     }
