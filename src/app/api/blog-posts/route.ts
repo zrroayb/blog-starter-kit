@@ -33,7 +33,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Blog post creation error:', error);
     return NextResponse.json(
-      { success: false, error: 'Blog yazısı eklenemedi: ' + error.message },
+      { 
+        success: false, 
+        error: 'Blog yazısı eklenemedi: ' + (error instanceof Error ? error.message : 'Bilinmeyen hata')
+      },
       { status: 500 }
     );
   }
