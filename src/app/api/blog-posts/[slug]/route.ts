@@ -1,21 +1,15 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
-import { NextRequest } from 'next/server';
-
-type Props = {
-  params: {
-    slug: string;
-  };
-};
 
 export async function GET(
-  _request: NextRequest,
-  context: Props
+  request: NextRequest,
+  { params }: { params: { slug: string } }
 ) {
   try {
     await dbConnect();
-    const post = await Post.findById(context.params.slug);
+    const post = await Post.findById(params.slug);
     
     if (!post) {
       return NextResponse.json(

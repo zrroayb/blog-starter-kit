@@ -10,9 +10,6 @@ const nextConfig = {
     NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET:
       process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET,
   },
-  experimental: {
-    appDir: true,
-  },
 };
 
 module.exports = nextConfig;

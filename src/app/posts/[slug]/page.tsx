@@ -18,7 +18,7 @@ interface Post {
 }
 
 export default function BlogPost() {
-  const params = useParams<{ slug: string }>();
+  const params = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
 
