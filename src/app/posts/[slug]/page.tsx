@@ -7,6 +7,7 @@ import { PostHeader } from "@/app/_components/post-header";
 import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import { Types } from 'mongoose';
+import type { Metadata } from 'next';
 
 interface PostType {
   slug: string;
@@ -49,14 +50,11 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
   }
 }
 
-interface Props {
-  params: {
-    slug: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
+type Props = {
+  params: { slug: string }
 }
 
-export default async function BlogPost({ params, searchParams }: Props) {
+export default async function BlogPost({ params }: Props) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -81,7 +79,7 @@ export default async function BlogPost({ params, searchParams }: Props) {
   );
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
