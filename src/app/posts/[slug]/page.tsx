@@ -8,23 +8,10 @@ import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import { Types } from 'mongoose';
 
-interface PostData {
-  slug: string;
-  title: string;
-  date: string;
-  content: string;
-  author: {
-    name: string;
-    picture: string;
-  };
-  coverImage: string;
-  excerpt: string;
-}
-
-async function getPostBySlug(slug: string): Promise<PostData | null> {
+async function getPost(id: string) {
   try {
     await dbConnect();
-    const objectId = new Types.ObjectId(slug);
+    const objectId = new Types.ObjectId(id);
     const post = await Post.findById(objectId).lean();
 
     if (!post) {
@@ -32,16 +19,13 @@ async function getPostBySlug(slug: string): Promise<PostData | null> {
     }
 
     return {
-      slug: post._id.toString(),
-      title: post.title,
+      ...post,
+      _id: post._id.toString(),
       date: new Date(post.date).toISOString(),
-      content: post.content,
       author: {
         name: post.author,
         picture: '/assets/blog/authors/default.jpg'
-      },
-      coverImage: post.coverImage,
-      excerpt: post.excerpt
+      }
     };
   } catch (error) {
     console.error('Error fetching post:', error);
@@ -49,12 +33,8 @@ async function getPostBySlug(slug: string): Promise<PostData | null> {
   }
 }
 
-export default async function PostPage({
-  params,
-}: {
-  params: { slug: string }
-}) {
-  const post = await getPostBySlug(params.slug);
+export default async function Page({ params }: { params: { slug: string } }) {
+  const post = await getPost(params.slug);
 
   if (!post) {
     notFound();
@@ -78,12 +58,12 @@ export default async function PostPage({
   );
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string }
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: { slug: string } 
 }): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug);
+  const post = await getPost(params.slug);
 
   if (!post) {
     return {
