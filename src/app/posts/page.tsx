@@ -6,20 +6,34 @@ import DateFormatter from '@/app/_components/date-formatter';
 import { PostPreview } from "@/app/_components/post-preview";
 import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
+import { Types } from 'mongoose';
 
-interface Post {
-  _id: string;
+// Interface for MongoDB document
+interface MongoPost {
+  _id: Types.ObjectId;
   title: string;
   excerpt: string;
   coverImage: string;
   date: string;
   author: string;
+  content: string;
 }
 
-async function getPosts() {
+// Interface for transformed post
+interface PostData {
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage: string;
+  date: string;
+  author: string;
+  content: string;
+}
+
+async function getPosts(): Promise<PostData[]> {
   try {
     await dbConnect();
-    const posts = await Post.find({}).sort({ date: -1 }).lean();
+    const posts = await Post.find({}).sort({ date: -1 }).lean() as MongoPost[];
     
     // Transform MongoDB documents to match the existing Post interface
     return posts.map(post => ({
