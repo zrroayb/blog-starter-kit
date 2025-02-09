@@ -50,28 +50,60 @@ export default function BlogPost() {
     }
   }, [params.slug]);
 
+  if (loading) {
+    return (
+      <Container>
+        <Header />
+        <div className="flex justify-center items-center h-64">
+          <div className="text-xl">Yazı Yükleniyor...</div>
+        </div>
+      </Container>
+    );
+  }
+
   if (!post) {
-    return notFound();
+    return (
+      <Container>
+        <Header />
+        <div className="flex justify-center items-center h-64">
+          <div className="text-xl">Yazı bulunamadı.</div>
+        </div>
+      </Container>
+    );
   }
 
   const content = await markdownToHtml(post.content || "");
 
   return (
-    <main>
-      <Alert preview={post.preview} />
-      <Container>
-        <Header />
-        <article className="mb-32">
-          <PostHeader
-            title={post.title}
-            coverImage={post.coverImage}
-            date={post.date}
-            author={post.author}
+    <Container>
+      <Header />
+      <article className="mb-32">
+        <div className="relative w-full h-96 mb-8">
+          <Image
+            src={post.coverImage}
+            alt={post.title}
+            fill
+            className="object-cover rounded-lg"
+            priority
           />
-          <PostBody content={content} />
-        </article>
-      </Container>
-    </main>
+        </div>
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
+          <div className="mb-6 text-lg">
+            <DateFormatter dateString={post.date} />
+            <span className="mx-2">•</span>
+            <span>{post.author}</span>
+          </div>
+          <div className="prose prose-lg dark:prose-invert max-w-none">
+            {post.content.split('\n').map((paragraph, index) => (
+              <p key={index} className="mb-4">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </div>
+      </article>
+    </Container>
   );
 }
 
