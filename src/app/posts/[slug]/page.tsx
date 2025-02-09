@@ -21,12 +21,6 @@ interface PostType {
   content: string;
 }
 
-interface PageProps {
-  params: {
-    slug: string;
-  };
-}
-
 async function getPostBySlug(slug: string): Promise<PostType | null> {
   try {
     await dbConnect();
@@ -55,7 +49,14 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
   }
 }
 
-export default async function BlogPost({ params }: PageProps) {
+interface Props {
+  params: {
+    slug: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+export default async function BlogPost({ params, searchParams }: Props) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -80,10 +81,19 @@ export default async function BlogPost({ params }: PageProps) {
   );
 }
 
-export function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: Props) {
+  const post = await getPostBySlug(params.slug);
+
+  if (!post) {
+    return {
+      title: 'Blog Yazısı Bulunamadı | Bodrum',
+      description: 'İstenen blog yazısı bulunamadı.',
+    };
+  }
+
   return {
-    title: `${params.slug} | Blog Yazıları | Bodrum`,
-    description: 'Bodrum hakkında detaylı blog yazısı.',
+    title: `${post.title} | Blog Yazıları | Bodrum`,
+    description: post.excerpt,
   };
 }
 
