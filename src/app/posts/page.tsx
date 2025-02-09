@@ -17,6 +17,7 @@ interface MongoPost {
   date: string;
   author: string;
   content: string;
+  __v?: number;
 }
 
 // Interface for transformed post
@@ -33,7 +34,8 @@ interface PostData {
 async function getPosts(): Promise<PostData[]> {
   try {
     await dbConnect();
-    const posts = await Post.find({}).sort({ date: -1 }).lean() as MongoPost[];
+    // First cast to unknown, then to MongoPost[]
+    const posts = (await Post.find({}).sort({ date: -1 }).lean()) as unknown as MongoPost[];
     
     // Transform MongoDB documents to match the existing Post interface
     return posts.map(post => ({
