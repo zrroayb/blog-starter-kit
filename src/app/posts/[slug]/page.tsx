@@ -21,12 +21,6 @@ interface PostData {
   excerpt: string;
 }
 
-type Props = {
-  params: {
-    slug: string;
-  };
-};
-
 async function getPostBySlug(slug: string): Promise<PostData | null> {
   try {
     await dbConnect();
@@ -55,7 +49,15 @@ async function getPostBySlug(slug: string): Promise<PostData | null> {
   }
 }
 
-export default async function PostPage({ params }: Props) {
+interface PageParams {
+  slug: string;
+}
+
+export default async function PostPage({
+  params,
+}: {
+  params: PageParams;
+}) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -80,7 +82,11 @@ export default async function PostPage({ params }: Props) {
   );
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: PageParams;
+}): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
