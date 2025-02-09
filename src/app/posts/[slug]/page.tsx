@@ -50,11 +50,11 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
   }
 }
 
-type Props = {
-  params: { slug: string }
-}
-
-export default async function BlogPost({ params }: Props) {
+export default async function BlogPost({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -79,7 +79,11 @@ export default async function BlogPost({ params }: Props) {
   );
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
