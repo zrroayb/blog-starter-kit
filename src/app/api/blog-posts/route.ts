@@ -20,7 +20,6 @@ export async function POST(request: Request) {
     await dbConnect();
     const data = await request.json();
 
-    // Validate required fields
     if (!data.title || !data.content || !data.excerpt || !data.coverImage || !data.author) {
       return NextResponse.json(
         { success: false, error: 'Tüm alanlar zorunludur' },
@@ -33,10 +32,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Blog post creation error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Blog yazısı eklenemedi: ' + (error instanceof Error ? error.message : 'Bilinmeyen hata')
-      },
+      { success: false, error: 'Blog yazısı eklenemedi' },
       { status: 500 }
     );
   }

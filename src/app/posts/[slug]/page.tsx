@@ -49,14 +49,10 @@ async function getPostBySlug(slug: string): Promise<PostData | null> {
   }
 }
 
-interface PageParams {
-  slug: string;
-}
-
 export default async function PostPage({
   params,
 }: {
-  params: PageParams;
+  params: { slug: string }
 }) {
   const post = await getPostBySlug(params.slug);
 
@@ -85,7 +81,7 @@ export default async function PostPage({
 export async function generateMetadata({
   params,
 }: {
-  params: PageParams;
+  params: { slug: string }
 }): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
 
