@@ -48,6 +48,27 @@ async function getPost(slug: string) {
   }
 }
 
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await getPost(params.slug);
+
+  if (!post) {
+    return {
+      title: 'Blog Yazısı Bulunamadı | Bodrum',
+      description: 'İstenen blog yazısı bulunamadı.',
+    };
+  }
+
+  return {
+    title: `${post.title} | Bodrum Blog`,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: [post.coverImage],
+    },
+  };
+}
+
 export default async function BlogPost({ params }: { params: { slug: string } }) {
   const post = await getPost(params.slug);
 
@@ -89,30 +110,6 @@ export default async function BlogPost({ params }: { params: { slug: string } })
       </Container>
     </main>
   );
-}
-
-export const metadata = {
-  title: 'Blog Yazısı | Bodrum',
-  description: 'Bodrum blog yazısı detayları.',
-};
-
-export async function generateMetadata(props: Params): Promise<Metadata> {
-  const params = await props.params;
-  const post = getPostBySlug(params.slug);
-
-  if (!post) {
-    return notFound();
-  }
-
-  const title = `${post.title} | Next.js Blog Example with ${CMS_NAME}`;
-
-  return {
-    title,
-    openGraph: {
-      title,
-      images: [post.ogImage.url],
-    },
-  };
 }
 
 export async function generateStaticParams() {
