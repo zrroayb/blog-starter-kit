@@ -1,13 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllPosts, getPostBySlug } from "@/lib/api";
-import { CMS_NAME } from "@/lib/constants";
-import markdownToHtml from "@/lib/markdownToHtml";
-import Alert from "@/app/_components/alert";
 import Container from "@/app/_components/container";
 import Header from "@/app/_components/header";
-import { PostBody } from "@/app/_components/post-body";
-import { PostHeader } from "@/app/_components/post-header";
 import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import DateFormatter from '@/app/_components/date-formatter';
@@ -23,10 +17,15 @@ interface PostData {
   author: string;
 }
 
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
+
 async function getPost(slug: string) {
   try {
     await dbConnect();
-    // Convert slug (which is the _id) to MongoDB ObjectId
     const objectId = new Types.ObjectId(slug);
     const post = await Post.findById(objectId).lean() as PostData | null;
     
@@ -48,7 +47,7 @@ async function getPost(slug: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const post = await getPost(params.slug);
 
   if (!post) {
@@ -69,7 +68,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function BlogPost({ params }: { params: { slug: string } }) {
+export default async function BlogPost({ params }: PageProps) {
   const post = await getPost(params.slug);
 
   if (!post) {
@@ -78,7 +77,6 @@ export default async function BlogPost({ params }: { params: { slug: string } })
 
   return (
     <main>
-      <Alert preview={post.preview} />
       <Container>
         <Header />
         <article className="max-w-4xl mx-auto py-8">
@@ -113,9 +111,14 @@ export default async function BlogPost({ params }: { params: { slug: string } })
 }
 
 export async function generateStaticParams() {
-  const posts = getAllPosts();
-
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  try {
+    await dbConnect();
+    const posts = await Post.find({}).lean();
+    return posts.map((post) => ({
+      slug: post._id.toString(),
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    return [];
+  }
 }
