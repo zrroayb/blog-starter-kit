@@ -1,6 +1,3 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Container from "@/app/_components/container";
 import Header from "@/app/_components/header";
 import Image from 'next/image';
