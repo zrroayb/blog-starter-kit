@@ -17,11 +17,12 @@ interface PostData {
   author: string;
 }
 
-interface PageProps {
+type Props = {
   params: {
     slug: string;
   };
-}
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
 async function getPost(slug: string) {
   try {
@@ -47,7 +48,7 @@ async function getPost(slug: string) {
   }
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPost(params.slug);
 
   if (!post) {
@@ -68,7 +69,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function BlogPost({ params }: PageProps) {
+export default async function BlogPost({ params }: Props) {
   const post = await getPost(params.slug);
 
   if (!post) {
