@@ -19,13 +19,17 @@ interface PostType {
   };
   excerpt: string;
   content: string;
-  preview?: boolean;
+}
+
+interface PageProps {
+  params: {
+    slug: string;
+  };
 }
 
 async function getPostBySlug(slug: string): Promise<PostType | null> {
   try {
     await dbConnect();
-    // Convert string slug back to ObjectId
     const objectId = new Types.ObjectId(slug);
     const post = await Post.findById(objectId).lean();
 
@@ -43,8 +47,7 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
         picture: '/assets/blog/authors/default.jpg'
       },
       excerpt: post.excerpt,
-      content: post.content,
-      preview: false
+      content: post.content
     };
   } catch (error) {
     console.error('Error fetching post:', error);
@@ -52,7 +55,7 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
   }
 }
 
-export default async function BlogPost({ params }: { params: { slug: string } }) {
+export default async function BlogPost({ params }: PageProps) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -77,7 +80,7 @@ export default async function BlogPost({ params }: { params: { slug: string } })
   );
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
+export function generateMetadata({ params }: PageProps) {
   return {
     title: `${params.slug} | Blog Yazıları | Bodrum`,
     description: 'Bodrum hakkında detaylı blog yazısı.',
