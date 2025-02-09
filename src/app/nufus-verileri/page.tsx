@@ -16,52 +16,73 @@ interface LocationData {
 
 export default function NufusVerileri() {
   const [data, setData] = useState<LocationData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Direkt MongoDB verilerini getir
-    fetch('/api/bodrum-data')
-      .then(res => res.json())
-      .then(result => {
-        if (result.data) {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/bodrum-data');
+        const result = await response.json();
+        console.log('API Response:', result); // Debug için
+        if (result.success) {
           setData(result.data);
         }
-      });
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <Container>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-xl">Veriler Yükleniyor...</div>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container>
-      <div style={{ padding: '20px' }}>
-        <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>Bodrum Nüfus Verileri</h1>
-        <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f5f5f5' }}>
-              <th style={{ border: '1px solid #ddd', padding: '12px' }}>Fotoğraf</th>
-              <th style={{ border: '1px solid #ddd', padding: '12px' }}>İlçe</th>
-              <th style={{ border: '1px solid #ddd', padding: '12px' }}>Mahalle</th>
-              <th style={{ border: '1px solid #ddd', padding: '12px' }}>Nüfus</th>
-              <th style={{ border: '1px solid #ddd', padding: '12px' }}>Yüzölçümü</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map(item => (
-              <tr key={item._id}>
-                <td style={{ border: '1px solid #ddd', padding: '12px', textAlign: 'center' }}>
-                  <Image
-                    src={item.photo}
-                    alt={item.ilce}
-                    width={80}
-                    height={60}
-                    style={{ objectFit: 'cover' }}
-                  />
-                </td>
-                <td style={{ border: '1px solid #ddd', padding: '12px' }}>{item.ilce}</td>
-                <td style={{ border: '1px solid #ddd', padding: '12px' }}>{item.mahalle}</td>
-                <td style={{ border: '1px solid #ddd', padding: '12px' }}>{item.nufus}</td>
-                <td style={{ border: '1px solid #ddd', padding: '12px' }}>{item.yuzolcumu}</td>
+      <div className="py-8">
+        <h1 className="text-3xl font-bold mb-6">Bodrum Nüfus Verileri</h1>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="border p-4">Fotoğraf</th>
+                <th className="border p-4">İlçe</th>
+                <th className="border p-4">Mahalle</th>
+                <th className="border p-4">Nüfus</th>
+                <th className="border p-4">Yüzölçümü</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map(item => (
+                <tr key={item._id} className="hover:bg-gray-50">
+                  <td className="border p-4 text-center">
+                    <Image
+                      src={item.photo}
+                      alt={item.ilce}
+                      width={80}
+                      height={60}
+                      className="inline-block object-cover"
+                    />
+                  </td>
+                  <td className="border p-4">{item.ilce}</td>
+                  <td className="border p-4">{item.mahalle}</td>
+                  <td className="border p-4">{item.nufus.toLocaleString()}</td>
+                  <td className="border p-4">{item.yuzolcumu}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </Container>
   );
