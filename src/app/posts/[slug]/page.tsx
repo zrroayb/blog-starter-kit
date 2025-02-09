@@ -72,8 +72,6 @@ export default function BlogPost() {
     );
   }
 
-  const content = await markdownToHtml(post.content || "");
-
   return (
     <Container>
       <Header />
