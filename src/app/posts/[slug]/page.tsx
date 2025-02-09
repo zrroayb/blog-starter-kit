@@ -21,10 +21,11 @@ interface PostData {
   excerpt: string;
 }
 
-interface PageProps {
-  params: { slug: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+type Props = {
+  params: {
+    slug: string;
+  };
+};
 
 async function getPostBySlug(slug: string): Promise<PostData | null> {
   try {
@@ -54,7 +55,7 @@ async function getPostBySlug(slug: string): Promise<PostData | null> {
   }
 }
 
-export default async function PostPage({ params }: PageProps) {
+export default async function PostPage({ params }: Props) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -79,7 +80,7 @@ export default async function PostPage({ params }: PageProps) {
   );
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
