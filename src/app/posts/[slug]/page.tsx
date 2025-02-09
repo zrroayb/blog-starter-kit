@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllPosts, getPostBySlug } from "@/lib/api";
+import { getAllPosts } from "@/lib/api";
 import { CMS_NAME } from "@/lib/constants";
 import markdownToHtml from "@/lib/markdownToHtml";
 import Alert from "@/app/_components/alert";
@@ -12,23 +12,16 @@ import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import { Types } from 'mongoose';
 
-interface PostType {
-  slug: string;
-  title: string;
-  date: string;
-  coverImage: string;
-  author: {
-    name: string;
-    picture: string;
+interface Params {
+  params: {
+    slug: string;
   };
-  excerpt: string;
-  content: string;
 }
 
-async function getPostBySlug(slug: string): Promise<PostType | null> {
+async function getPostBySlug(slug: string) {
   try {
     await dbConnect();
-    // Convert string slug back to ObjectId
+    // Convert slug (which is the _id string) back to ObjectId
     const objectId = new Types.ObjectId(slug);
     const post = await Post.findById(objectId).lean();
 
@@ -37,16 +30,16 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
     }
 
     return {
-      slug: post._id.toString(),
+      slug,
       title: post.title,
       date: new Date(post.date).toISOString(),
-      coverImage: post.coverImage,
+      content: post.content,
       author: {
         name: post.author,
         picture: '/assets/blog/authors/default.jpg'
       },
+      coverImage: post.coverImage,
       excerpt: post.excerpt,
-      content: post.content
     };
   } catch (error) {
     console.error('Error fetching post:', error);
@@ -54,11 +47,7 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
   }
 }
 
-export default async function PostPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function PostPage({ params }: Params) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -84,10 +73,9 @@ export default async function PostPage({
   );
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
+export function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
-    title: `${params.slug} | Blog Yazıları | Bodrum`,
-    description: 'Bodrum hakkında detaylı blog yazısı.',
+    title: `${params.slug} | Bodrum Blog`,
   };
 }
 
