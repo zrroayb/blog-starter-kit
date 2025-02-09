@@ -40,17 +40,18 @@ interface PostData {
 async function getPosts(): Promise<PostData[]> {
   try {
     await dbConnect();
-    const posts = await Post.find({}).sort({ date: -1 }).lean();
+    const posts = (await Post.find({}).sort({ date: -1 }).lean()) as unknown as MongoPost[];
     
+    // Transform MongoDB documents to match the existing Post interface
     return posts.map(post => ({
       slug: post._id.toString(),
       title: post.title,
       excerpt: post.excerpt,
       coverImage: post.coverImage,
-      date: new Date(post.date).toISOString(),
+      date: new Date(post.date).toISOString(),  // Convert Date to ISO string
       author: {
         name: post.author,
-        picture: '/assets/blog/authors/default.jpg'
+        picture: '/assets/blog/authors/default.jpg'  // Default picture path
       },
       content: post.content
     }));
