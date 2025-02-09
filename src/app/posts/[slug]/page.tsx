@@ -1,9 +1,5 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllPosts, getPostBySlug } from "@/lib/api";
-import { CMS_NAME } from "@/lib/constants";
-import markdownToHtml from "@/lib/markdownToHtml";
-import Alert from "@/app/_components/alert";
 import Container from "@/app/_components/container";
 import Header from "@/app/_components/header";
 import { PostBody } from "@/app/_components/post-body";
@@ -23,6 +19,7 @@ interface PostType {
   };
   excerpt: string;
   content: string;
+  preview?: boolean;
 }
 
 async function getPostBySlug(slug: string): Promise<PostType | null> {
@@ -46,7 +43,8 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
         picture: '/assets/blog/authors/default.jpg'
       },
       excerpt: post.excerpt,
-      content: post.content
+      content: post.content,
+      preview: false
     };
   } catch (error) {
     console.error('Error fetching post:', error);
@@ -54,7 +52,7 @@ async function getPostBySlug(slug: string): Promise<PostType | null> {
   }
 }
 
-export default async function Post({ params }: { params: { slug: string } }) {
+export default async function BlogPost({ params }: { params: { slug: string } }) {
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
@@ -63,7 +61,6 @@ export default async function Post({ params }: { params: { slug: string } }) {
 
   return (
     <main>
-      <Alert preview={post.preview} />
       <Container>
         <Header />
         <article className="mb-32">
